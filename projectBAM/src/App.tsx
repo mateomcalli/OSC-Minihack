@@ -28,6 +28,8 @@ const App = () => {
     ssn: '',
   })
 
+  const [step, setStep] = useState<number>(1)
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerData(prev => ({
       ...prev,
@@ -45,9 +47,7 @@ const App = () => {
   }
 
   return (
-    <div className='bg-black flex min-w-screen min-h-screen items-center'>
-      <p className='text-white'>hi</p>
-    </div>
+    <div></div>
   )
 }
 
