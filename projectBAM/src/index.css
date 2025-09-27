@@ -1,1 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&display=swap');
 @import "tailwindcss";
+
+@theme {
+    --font-default: 'Host Grotesk', sans-serif;
+    --color-primary: #7E47F8;
+}
+
+.red {
+  @apply border-1 border-red-500
+}
+
+.green {
+  @apply border-1 border-green-500
+}
+
+.blue {
+  @apply border-1 border-blue-500
+}\
