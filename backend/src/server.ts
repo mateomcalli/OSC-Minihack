@@ -7,7 +7,7 @@ import Session from './mongo/Session.ts';
 import Transaction from './mongo/Transaction.ts';
 import mongoose from 'mongoose';
 import { testCustomer, testFundingSource, testCustomer1, testFundingSource1 } from './test.ts';
-import {CustomerData} from './types/types.ts'
+import { CustomerData } from './types/types.ts'
 import dwollaService from './services/dwollaService.ts'
 
 const app: Express = express();
@@ -24,7 +24,7 @@ app.use(cookieParser())
 const port = 3000;
 const url = process.env.MONGO_URI
 
-const getMongoUri = ():string => {
+const getMongoUri = (): string => {
   if (url) return url;
   else return "null"
 }
@@ -33,16 +33,20 @@ mongoose.connect(getMongoUri())
   .then(() => console.log('Connected to MongoDB!'))
   .catch(error => console.log('Error connecting to MongoDB:', error.message))
 
+app.delete('/api/delete', async (req: Request, res: Response) => {
+
+});
+
 app.post('/api/transaction', async (req: Request, res: Response) => {
   const userId = req.cookies.session;
   const collaborators = req.body.collaborators;
   const amountPaid = req.body.amountPaid;
   const transactionName = req.body.paymentName;
 
-  for(let i = 0; i < collaborators.length; i++) {
+  for (let i = 0; i < collaborators.length; i++) {
 
     let userAmount = amountPaid / collaborators.length;
-    const match = await User.findOne({ email: collaborators[i]});
+    const match = await User.findOne({ email: collaborators[i] });
 
     let otherId = "";
     if (match)
@@ -50,13 +54,13 @@ app.post('/api/transaction', async (req: Request, res: Response) => {
     else
       otherId = "null"
     console.log(`Creating transaction with ${otherId} and ${userId}}`)
-    const transactionId = await dwollaService.initiateTransaction(userId, otherId, userAmount.toFixed(2));
+    const transactionId = await dwollaService.initiateTransaction(otherId, oth, userAmount.toFixed(2));
     if (transactionId)
       await Transaction.create({
         name: transactionName,
         transactionId: transactionId,
         collaborators: collaborators.join(','),
-        amount: amountPaid.toFixed(2)
+        amount: userAmount.toFixed(2)
       });
   }
   return res.status(201);
@@ -65,12 +69,12 @@ app.post('/api/transaction', async (req: Request, res: Response) => {
 app.get('/api/auth', async (req: Request, res: Response) => {
   try {
     const sessionCookie = req.cookies.session
-    const match = await Session.findOne({ sessionId : sessionCookie })
+    const match = await Session.findOne({ sessionId: sessionCookie })
     if (!sessionCookie || !match) {
       return res.status(401).json({ error: 'invalid session, login again' })
     }
     console.log(`authorized with id: ${sessionCookie}`)
-    res.json({ message: "authorized with id: `${sessionCookie}`"})
+    res.json({ message: "authorized with id: `${sessionCookie}`" })
   } catch (error) {
     console.error(error)
   }
@@ -79,26 +83,36 @@ app.get('/api/auth', async (req: Request, res: Response) => {
 app.get('/api/transactions', async (req: Request, res: Response) => {
   const userId = req.cookies.session;
   const transactions = await dwollaService.getCustomerTransfers(userId);
-  let transactionIds= [];
+  let transactionIds = [];
   if (transactions) {
     for (let i = 0; i < transactions.length; i++) {
       let match = await Transaction.findOne({ transactionId: transactions[i].id });
-      if (match)
-        transactionIds.push({name: match.name, collaborators: match.collaborators, amount: match.amount});
+      if (match) {
+        transactionIds.push({
+          transactionId: match.transactionId,
+          name: match.name,
+          collaborators: match.collaborators,
+          amount: match.amount,
+          direction: transactions[i].direction
+        });
+      }
     }
     return res.status(200).json(transactionIds);
   }
   return res.status(404);
 });
 
-app.post('api/create-transaction', async (req: Request, res: Response) => {
-  const userId = req.cookies.sessionId;
-
+app.delete('/api/transaction/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await dwollaService.closeTransaction(id);
+  await Transaction.deleteOne({ transactionId: id });
+  res.status(200).json({ message: `Transaction ${id} deleted successfully.` });
 });
+
 
 app.post('/api/signup', async (req: Request, res: Response) => {
 
-  const customerData:CustomerData = {
+  const customerData: CustomerData = {
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
@@ -114,7 +128,7 @@ app.post('/api/signup', async (req: Request, res: Response) => {
   Object.entries(customerData).forEach(([key, value]) => {
     console.log(`${key}: ${value}`)
   })
-  
+
   const id = await dwollaService.createCustomer(customerData);
   const newUser = await User.create({
     email: req.body.email,
@@ -130,7 +144,7 @@ app.post('/api/signup', async (req: Request, res: Response) => {
   await dwollaService.addCustomerFundingSource(id, testFundingSource);
 
   console.log('Setting cookie with sessionId:', sessionId)
-  res.cookie('session', sessionId, { 
+  res.cookie('session', sessionId, {
     expires: expiryDate,
     httpOnly: true,
     secure: false, // set to true in deployment as well
@@ -158,7 +172,7 @@ app.post('/api/login', async (req: Request, res: Response) => {
     expiryDate.setHours(expiryDate.getHours() + 24)
 
     console.log('Setting cookie with sessionId:', sessionId)
-    res.cookie('session', sessionId, { 
+    res.cookie('session', sessionId, {
       expires: expiryDate,
       httpOnly: true,
       secure: false, // set to true in deployment as well
@@ -169,7 +183,7 @@ app.post('/api/login', async (req: Request, res: Response) => {
       sessionId: sessionId,
       expiryDate: expiryDate
     })
-    
+
     return res.status(201).json(session)
   } catch (error) {
     console.error(error)

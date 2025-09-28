@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useState, useRef, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 interface NewTransactionProps {
   paymentName: string
@@ -9,11 +9,13 @@ interface NewTransactionProps {
 }
 
 const New = () => {
+  const navigate = useNavigate()
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         await axios.get(`http://localhost:3000/api/auth`, { withCredentials: true })
-      } catch (error) { 
+      } catch (error) {
         console.error(error)
         window.location.href = '/login'
       }
@@ -38,8 +40,8 @@ const New = () => {
         name === "collaborators"
           ? value.split(",").map((c) => c.trim())
           : name === "amountPaid"
-          ? parseFloat(value) || 0
-          : value,
+            ? parseFloat(value) || 0
+            : value,
     }))
   }
 
@@ -47,14 +49,9 @@ const New = () => {
     event.preventDefault()
     try {
       console.log("Submitting:", transaction)
-      await axios.post("http://localhost:3000/api/transaction", transaction, {withCredentials: true})
-
-      setTransaction({
-        paymentName: "",
-        collaborators: [],
-        amountPaid: 0,
-      })
-      formRef.current?.reset()
+      await axios.post("http://localhost:3000/api/transaction", transaction, { withCredentials: true })
+      // Navigate back to the home page after successful submission
+      navigate('/home')
     } catch (error) {
       console.error("Error submitting transaction:", error)
     }

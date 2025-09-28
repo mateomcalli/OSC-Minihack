@@ -23,5 +23,6 @@ interface Transfer {
     status: string;
     amount: string;
     created: string;
+    direction: string;
 }
 export { CustomerData, FundingSource, Transfer };

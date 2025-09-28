@@ -4,8 +4,16 @@ import { Link } from "react-router-dom";
 import { LuUser } from "react-icons/lu";
 import { useEffect, useState, useMemo } from "react";
 
+interface Transaction {
+  transactionId: string;
+  name: string;
+  collaborators: string;
+  amount: string;
+  direction: 'incoming' | 'outgoing';
+}
+
 const Home = () => {
-  const [transactionsList, setTransactionsList] = useState<any[]>([]);
+  const [transactionsList, setTransactionsList] = useState<Transaction[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,6 +38,15 @@ const Home = () => {
     getTransactions();
   }, []);
 
+  const handleDelete = async (transactionId: string) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/transaction/${transactionId}`, { withCredentials: true });
+      setTransactionsList(prev => prev.filter(t => t.transactionId !== transactionId));
+    } catch (error) {
+      console.error("Failed to delete transaction:", error);
+    }
+  };
+
   const sum = useMemo(() => {
     return transactionsList.reduce((acc, transaction) => acc + Number(transaction.amount || 0), 18);
   }, [transactionsList]);
@@ -46,18 +63,44 @@ const Home = () => {
       </div>
 
       <div className="mb-6">
-        <h1 className="text-4xl mb-5">Active</h1>
+        <h1 className="text-4xl mb-5">You Owe</h1>
         <div className="bg-white shadow rounded-2xl p-4 space-y-4">
-          <Link to='/transactioninfo'>
-            {transactionsList.map((transaction, i) => (
+          {transactionsList.filter(t => t.direction === 'outgoing').map((transaction) => (
+            <Link to='/transactioninfo' key={transaction.transactionId}>
               <HomepageEntry
-                key={i}
                 paymentName={transaction.name}
                 collaborators={transaction.collaborators}
                 amountPaid={`$${transaction.amount}`}
+                transactionId={transaction.transactionId}
+                onDelete={handleDelete}
+                direction='outgoing'
               />
-            ))}
-          </Link>
+            </Link>
+          ))}
+          {transactionsList.filter(t => t.direction === 'outgoing').length === 0 && (
+            <p className="text-center text-gray-500">No pending payments.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <h1 className="text-4xl mb-5">Owed to You</h1>
+        <div className="bg-white shadow rounded-2xl p-4 space-y-4">
+          {transactionsList.filter(t => t.direction === 'incoming').map((transaction) => (
+            <Link to='/transactioninfo' key={transaction.transactionId}>
+              <HomepageEntry
+                paymentName={transaction.name}
+                collaborators={transaction.collaborators}
+                amountPaid={`$${transaction.amount}`}
+                transactionId={transaction.transactionId}
+                onDelete={handleDelete}
+                direction='incoming'
+              />
+            </Link>
+          ))}
+          {transactionsList.filter(t => t.direction === 'incoming').length === 0 && (
+            <p className="text-center text-gray-500">No incoming payments.</p>
+          )}
         </div>
       </div>
 
