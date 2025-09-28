@@ -18,4 +18,10 @@ interface FundingSource {
     name: string;
 }
 
-export { CustomerData, FundingSource };
+interface Transfer {
+    id: string;
+    status: string;
+    amount: string;
+    created: string;
+}
+export { CustomerData, FundingSource, Transfer };

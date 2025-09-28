@@ -1,5 +1,5 @@
 import { dwolla } from '../config/dwolla.ts';
-import type { CustomerData, FundingSource } from '../types/types.ts';
+import type { CustomerData, FundingSource, Transfer } from '../types/types.ts';
 
 // Sends new customer creation request to the dwolla API, then returns the generated customerID.
 // Responds with Error in case of error.
@@ -39,11 +39,13 @@ async function addCustomerFundingSource(customerId: string, fundingSource: Fundi
                     'Content-Type': 'application/vnd.dwolla.v1.hal+json'
                 }
             });
+
+        await verifyFundingSource(customerId);
         
         console.log('Funding source addition success!')
     } catch {
         console.log("Error: Funding source could not be added.")    
-        return "Error: Funding source could not be added.";
+        return null;
     }
 }
 
@@ -96,9 +98,9 @@ async function verifyFundingSource(customerId:string){
                     'Content-Type': 'application/vnd.dwolla.v1.hal+json'
                 }
             });
-        console.log("Success")
+        console.log("Success");
     } catch {
-        console.log('Error verifying funding source.')
+        console.log('Error verifying funding source.');
     }
 }
 
@@ -142,8 +144,50 @@ async function initiateTransaction(recieverId:string, senderId:string, amount:st
     }
 }
 
-async function checkTransactionStats(transactionId:string){
-    
+async function checkTransactionStatus(transactionId:string){
+    const appToken = await dwolla.auth.client();
+
+    try{
+        const response = await appToken.get(`${transactionId}`,{},{
+            headers: {
+                Accept: 'application/vnd.dwolla.v1.hal+json',
+                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+                }
+        });
+        const status = response.body.status;
+        return status;
+    } catch {
+        console.log('Error checking transaction status.')
+    }
 }
 
-export { createCustomer, addCustomerFundingSource, getFundingSource, initiateTransaction, verifyFundingSource };
+async function getCustomerTransfers(customerId:string) {
+    const appToken = await dwolla.auth.client();
+
+    try {
+        const response = await appToken.get(`customers/${customerId}/transfers`,{},{
+            headers: {
+                Accept: 'application/vnd.dwolla.v1.hal+json',
+                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+                }
+        });
+        const transfers = response.body._embedded['transfers'];
+        let transferObjs:Transfer[] = [];
+        for(let i = 0; i < transfers.length; i++) {
+            console.log('Transaction ID: ' + transfers[i].id + ' Status: ' + transfers[i].status)
+            transferObjs.push({
+                id: transfers[i].id,
+                status: transfers[i].status,
+                amount: transfers[i].amount.value,
+                created: transfers[i].created
+            });
+        }
+        
+        return transferObjs;
+
+    } catch {
+        console.log('Error checking customer transactions.')
+    }
+}
+
+export default { createCustomer, addCustomerFundingSource, getFundingSource, initiateTransaction, verifyFundingSource, getCustomerTransfers};
