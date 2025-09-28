@@ -1,6 +1,20 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import axios from "axios";
 
 const Account = () => {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(`http://localhost:3000/api/auth`, { withCredentials: true })
+      } catch (error) { 
+        console.error(error)
+        window.location.href = '/login'
+      }
+    }
+    checkAuth()
+  }, [])
+  
   return (
     <div>
       <div className='relative z-1 flex flex-col pt-10 px-4'>

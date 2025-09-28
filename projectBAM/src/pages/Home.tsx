@@ -1,9 +1,32 @@
+import axios from "axios";
+import { HomepageEntry } from "../components/HomepageEntry";
 import { Link } from "react-router-dom";
 import { LuUser } from "react-icons/lu";
-import { HomepageEntry } from "../components/HomepageEntry";
+import { useEffect, useState } from "react";
+
 
 
 const Home = () => {
+  const [transactionsList, setTransactionsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(`http://localhost:3000/api/auth`, { withCredentials: true })
+      } catch (error) { 
+        console.error(error)
+        window.location.href = '/login'
+      }
+    }
+
+    const getTransactions = async () => {
+      const response = await axios.get('http://localhost:3000/api/transactions', { withCredentials: true });
+      setTransactionsList(response.data); 
+    }
+    checkAuth()
+    getTransactions()
+  }, [])
+
   return (
     <div className='relative z-1 flex flex-col pt-4 px-4'>
       <div className="flex justify-between">
@@ -19,10 +42,15 @@ const Home = () => {
     <div className="mb-6">
       <h1 className="text-2xl mb-3">Recent transactions</h1>
       <div className="bg-white shadow rounded-2xl p-4 space-y-4">
-        <HomepageEntry paymentName="Dinner" collaborators='Ben and 3 others' amountPaid="$183.23"/>
-        <HomepageEntry paymentName="Groceries" collaborators='Alice and 2 others' amountPaid="$96.20"/>
-        <HomepageEntry paymentName="Tab" collaborators='Nick and 12 others' amountPaid="$531.94"/>
-        </div>
+        {transactionsList.map((transaction, i) => (
+          <HomepageEntry
+            key={i}
+            paymentName={transaction.name}
+            collaborators={transaction.collaborators}
+            amountPaid={transaction.amount}
+          />
+        ))}
+      </div>
     </div>
      <div className="mb-10">
       <h1 className="text-2xl mb-3">Spending data</h1>
