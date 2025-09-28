@@ -5,18 +5,18 @@ import SignupTwo from "./SignupTwo"
 import Footer from "../../components/Footer"
 
 interface CustomerData {
-  firstName: string
-  lastName: string
-  email: string
-  dateOfBirth: string
-  phoneNumber: string
-  password: string
-  type: string
-  address1: string
-  city: string
-  state: string
-  postalCode: string
-  ssn: string
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  type: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  dateOfBirth: string;
+  ssn: string;
 }
 
 const Signup = () => {  
@@ -47,7 +47,7 @@ const Signup = () => {
   
   const postFunction = async () => {
     try { 
-      await axios.post('https://api-sandbox.dwolla.com/customers', customerData)
+      await axios.post('http://localhost:3000/api/signup', customerData, { withCredentials: true })
       console.log('Successfully posted customer data for customer ', customerData?.firstName)
     } catch (error) {
       console.error(error)

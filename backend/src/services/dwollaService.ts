@@ -15,13 +15,14 @@ async function createCustomer(customerData: CustomerData) {
             'Content-Type': 'application/vnd.dwolla.v1.hal+json'
             }
     });
-        const responseUrl = response.headers.get('Location');
+        const responseUrl = await response.headers.get('Location');
 
-        const customerId = responseUrl.split('/')[responseUrl.split('/').length - 1];
+        const customerId = await responseUrl.split('/')[responseUrl.split('/').length - 1];
 
         return customerId;
 
     } catch (error) {
+
         return "Error: Customer could not be created.";
     }
 }
