@@ -19,5 +19,26 @@ const testFundingSource: FundingSource = {
     name: "John Doe's Guap Account"
 }
 
-export {testCustomer, testFundingSource}
+
+
+const testCustomer1: CustomerData = {
+    firstName: "Jane",
+    lastName: "Doe",
+    email: "evilkiller@gmail.com",
+    type : "personal",
+    address1: "123 Main St",
+    city: "Miami",
+    state: "FL",
+    postalCode: "33126",
+    dateOfBirth: "1990-01-01",
+    ssn: "9999"
+}
+const testFundingSource1: FundingSource = {
+    routingNumber: "222222226",
+    accountNumber: "88888888888",
+    bankAccountType: "checking",
+    name: "Account of Evil"
+}
+
+export {testCustomer, testFundingSource, testCustomer1, testFundingSource1}
 

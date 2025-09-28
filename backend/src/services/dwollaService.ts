@@ -70,7 +70,39 @@ async function getFundingSource(customerId:string){
     }
 }
 
-async function initiateTransaction(recieverId:string, senderId:string, amount:number){
+async function verifyFundingSource(customerId:string){
+    const appToken = await dwolla.auth.client();
+    
+    const fundingSource = await getFundingSource(customerId);
+    try {
+        const response = await appToken.post(`${fundingSource}/micro-deposits`,{},
+            {
+                headers: {
+                    Accept: 'application/vnd.dwolla.v1.hal+json',
+                    'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+                }
+            });
+        const response2 = await appToken.post(`${fundingSource}/micro-deposits`,{
+            "amount1": {
+                "value": "0.01",
+                "currency": "USD"
+            },
+            "amount2": {
+                "value": "0.01",
+                "currency": "USD"
+            }},{
+                headers: {
+                    Accept: 'application/vnd.dwolla.v1.hal+json',
+                    'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+                }
+            });
+        console.log("Success")
+    } catch {
+        console.log('Error verifying funding source.')
+    }
+}
+
+async function initiateTransaction(recieverId:string, senderId:string, amount:string){
     const appToken = await dwolla.auth.client();
 
     const recieverFundingSource = await getFundingSource(recieverId);
@@ -93,6 +125,9 @@ async function initiateTransaction(recieverId:string, senderId:string, amount:nu
                 destination: {
                     href: recieverFundingSource
                 }
+            }, amount: {
+                currency: 'USD',
+                value: amount
             }}, {
                 headers: {
                     Accept: 'application/vnd.dwolla.v1.hal+json',
@@ -100,9 +135,15 @@ async function initiateTransaction(recieverId:string, senderId:string, amount:nu
                 }
             }
         );
+        console.log("Transfer successfully initiated")
+        return response.headers.get('Location');
     } catch {
         console.log('Error initiating transaction.')
     }
 }
 
-export { createCustomer, addCustomerFundingSource, getFundingSource };
+async function checkTransactionStats(transactionId:string){
+    
+}
+
+export { createCustomer, addCustomerFundingSource, getFundingSource, initiateTransaction, verifyFundingSource };
