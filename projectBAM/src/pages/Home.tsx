@@ -4,8 +4,15 @@ import { Link } from "react-router-dom";
 import { LuUser } from "react-icons/lu";
 import { useEffect, useState, useMemo } from "react";
 
+interface Transaction {
+  transactionId: string;
+  name: string;
+  collaborators: string;
+  amount: string;
+}
+
 const Home = () => {
-  const [transactionsList, setTransactionsList] = useState<any[]>([]);
+  const [transactionsList, setTransactionsList] = useState<Transaction[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,6 +37,15 @@ const Home = () => {
     getTransactions();
   }, []);
 
+  const handleDelete = async (transactionId: string) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/transaction/${transactionId}`, { withCredentials: true });
+      setTransactionsList(prev => prev.filter(t => t.transactionId !== transactionId));
+    } catch (error) {
+      console.error("Failed to delete transaction:", error);
+    }
+  };
+
   const sum = useMemo(() => {
     return transactionsList.reduce((acc, transaction) => acc + Number(transaction.amount || 0), 18);
   }, [transactionsList]);
@@ -51,10 +67,12 @@ const Home = () => {
           <Link to='/transactioninfo'>
             {transactionsList.map((transaction, i) => (
               <HomepageEntry
-                key={i}
+                key={transaction.transactionId}
                 paymentName={transaction.name}
                 collaborators={transaction.collaborators}
                 amountPaid={`$${transaction.amount}`}
+                transactionId={transaction.transactionId}
+                onDelete={handleDelete}
               />
             ))}
           </Link>

@@ -33,6 +33,10 @@ mongoose.connect(getMongoUri())
   .then(() => console.log('Connected to MongoDB!'))
   .catch(error => console.log('Error connecting to MongoDB:', error.message))
 
+app.delete('/api/delete', async (req: Request, res: Response) => {
+    
+  });
+
 app.post('/api/transaction', async (req: Request, res: Response) => {
   const userId = req.cookies.session;
   const collaborators = req.body.collaborators;
@@ -83,18 +87,27 @@ app.get('/api/transactions', async (req: Request, res: Response) => {
   if (transactions) {
     for (let i = 0; i < transactions.length; i++) {
       let match = await Transaction.findOne({ transactionId: transactions[i].id });
-      if (match)
-        transactionIds.push({name: match.name, collaborators: match.collaborators, amount: match.amount});
+      if (match) {
+        transactionIds.push({
+          transactionId: match.transactionId,
+          name: match.name,
+          collaborators: match.collaborators,
+          amount: match.amount
+        });
+      }
     }
     return res.status(200).json(transactionIds);
   }
   return res.status(404);
 });
 
-app.post('api/create-transaction', async (req: Request, res: Response) => {
-  const userId = req.cookies.sessionId;
-
+app.delete('/api/transaction/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await dwollaService.closeTransaction(id);
+  await Transaction.deleteOne({ transactionId: id });
+  res.status(200).json({ message: `Transaction ${id} deleted successfully.` });
 });
+
 
 app.post('/api/signup', async (req: Request, res: Response) => {
 

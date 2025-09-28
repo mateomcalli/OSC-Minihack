@@ -171,6 +171,8 @@ async function getCustomerTransfers(customerId:string) {
         const transfers = response.body._embedded['transfers'];
         let transferObjs:Transfer[] = [];
         for(let i = 0; i < transfers.length; i++) {
+            if (transfers[i].status === 'cancelled')
+                continue;
             console.log('Transaction ID: ' + transfers[i].id + ' Status: ' + transfers[i].status)
             transferObjs.push({
                 id: transfers[i].id,
@@ -187,4 +189,20 @@ async function getCustomerTransfers(customerId:string) {
     }
 }
 
-export default { createCustomer, addCustomerFundingSource, getFundingSource, initiateTransaction, verifyFundingSource, getCustomerTransfers};
+async function closeTransaction(transactionId:string) {
+    const appToken = await dwolla.auth.client();
+    try {
+        const response = await appToken.post(`transfers/${transactionId}`,{
+            status: 'cancelled'
+        },
+            {headers: {
+                Accept: 'application/vnd.dwolla.v1',
+                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+            }});
+        console.log(`${transactionId} successfully closed.`)
+    } catch {
+        console.log('Error closing transaction.')
+    }
+}
+
+export default { createCustomer, addCustomerFundingSource, getFundingSource, initiateTransaction, verifyFundingSource, getCustomerTransfers, closeTransaction, checkTransactionStatus };
