@@ -18,7 +18,7 @@ const SignupTwo = ({ postFunction, handleChange, customerData }: SignupTwoProps)
   return (
     <div className="relative z-1 flex flex-col pt-16 px-4">
       <div className="flex justify-center">
-        <img src="logo.png" className="w-[64px] h-[70px] mb-7" />
+        <img src="logo.png" className="w-[64px] h-[70px] mb-7 drop-shadow-md/50" />
       </div>
       <div className="mt-7" id="spacer-for-input-fields">
         <input

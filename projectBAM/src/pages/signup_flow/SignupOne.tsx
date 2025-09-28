@@ -21,7 +21,7 @@ const SignupOne = ({ setStep, handleChange, customerData }: SignupOneProps) => {
   return (
     <div className="relative z-1 pt-16 px-4">
       <div className="flex flex-col">
-        <img src="logo.png" className="w-[64px] h-[70px] mb-7" />
+        <img src="logo.png" className="w-[64px] h-[70px] mb-7 drop-shadow-md/50" />
         <h1 className="font-default text-gray-500 text-4xl">Sign Up</h1>
       </div>
       <div className="mt-7" id="spacer-for-input-fields">

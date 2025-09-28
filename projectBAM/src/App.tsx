@@ -5,6 +5,7 @@ import Layout from "./pages/Layout.tsx";
 import Home from "./pages/Home.tsx";
 import New from "./pages/New.tsx";
 import Account from "./pages/Account.tsx";
+import TransactionInfo from "./pages/TransactionInfo.tsx";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path='/home' element={<Home />}/>
         <Route path='/new' element={<New />}/>
         <Route path='/account' element={<Account />}/>
+        <Route path='/transactioninfo' element={<TransactionInfo />}/>
       </Route>
     </Routes>
    </Router>

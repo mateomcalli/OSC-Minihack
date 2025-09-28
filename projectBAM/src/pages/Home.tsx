@@ -13,7 +13,7 @@ const Home = () => {
       <div className="mb-6">
         <h1 className="text-4xl mb-5">Active</h1>
         <div className="bg-white shadow rounded-2xl p-4 space-y-4">
-          <HomepageEntry paymentName='Weekend Trip' collaborators="Daksh and 2 others" amountPaid="$56.09 left"/>
+          <Link to='/transactioninfo'><HomepageEntry paymentName='Weekend Trip' collaborators="Daksh and 2 others" amountPaid="$56.09 left"/></Link>
           </div>
       </div>
     <div className="mb-6">
