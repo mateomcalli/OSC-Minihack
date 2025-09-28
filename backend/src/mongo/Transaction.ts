@@ -11,7 +11,7 @@ const TransactionSchema = new Schema({
 name: {
     type: String,
     required: true,
-    unique: true
+    unique: false
   },
   transactionId: {
     type: String,
@@ -21,7 +21,7 @@ name: {
   collaborators: {
     type: String,
     required: true,
-    unique: true
+    unique: false
   },
   amount: {
     type: String,

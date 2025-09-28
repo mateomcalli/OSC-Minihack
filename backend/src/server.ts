@@ -56,7 +56,7 @@ app.post('/api/transaction', async (req: Request, res: Response) => {
         name: transactionName,
         transactionId: transactionId,
         collaborators: collaborators.join(','),
-        amount: amountPaid.toFixed(2)
+        amount: userAmount.toFixed(2)
       });
   }
   return res.status(201);
