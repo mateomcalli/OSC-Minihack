@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 interface NewBankAccountProps {
@@ -10,6 +10,18 @@ interface NewBankAccountProps {
 }
 
 const Account = () => {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(`http://localhost:3000/api/auth`, { withCredentials: true })
+      } catch (error) { 
+        console.error(error)
+        window.location.href = '/login'
+      }
+    }
+    checkAuth()
+  }, [])
+
   const [bankAccount, setBankAccount] = useState<NewBankAccountProps>({
     routingNumber: "",
     accountNumber: "",
