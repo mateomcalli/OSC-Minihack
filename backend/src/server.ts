@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import express, { Express, Request, Response } from 'express';
 import User from './mongo/User.ts';
 import Session from './mongo/Session.ts';
+import Transaction from './mongo/Transaction.ts';
 import mongoose from 'mongoose';
 import { testCustomer, testFundingSource, testCustomer1, testFundingSource1 } from './test.ts';
 import {CustomerData} from './types/types.ts'
@@ -32,15 +33,45 @@ mongoose.connect(getMongoUri())
   .then(() => console.log('Connected to MongoDB!'))
   .catch(error => console.log('Error connecting to MongoDB:', error.message))
 
-app.post('/api/transaction', async (req: Request, res: Response) => {
-  try {
-    const userId = req.cookies.sessionId
-  } catch (error) {
-    console.error(error)
-  }
+app.post('api/transaction', async (req: Request, res: Response) => {
+  const userId = req.cookies.sessionId;
+  const collaborators = req.body.collaborators;
+  const amountPaid = req.body.amountPaid;
+  const transactionName = req.body.paymentName;
 
-})
-  
+  for(let i = 0; i < collaborators.length; i++) {
+    let userAmount = amountPaid / collaborators.length;
+    const match = await User.findOne({ email: collaborators[i]});
+
+    let otherId = "";
+
+    if (match)
+      otherId = match.userId;
+    else
+      otherId = "null"
+
+    let transactionId = await dwollaService.initiateTransaction(userId, otherId, userAmount.toFixed(2));
+    if (!transactionId)
+
+      await Transaction.create({
+        name: transactionName,
+        transactionId: transactionId,
+        collaborators: collaborators.join(',')
+      });
+  }
+});
+
+app.get('/api/transactions', async (req: Request, res: Response) => {
+  const userId = req.cookies.sessionId;
+  const transactions = await dwollaService.getCustomerTransfers(userId);
+  res.status(201).json(transactions);
+});
+
+app.post('api/create-transaction', async (req: Request, res: Response) => {
+  const userId = req.cookies.sessionId;
+
+});
+
 app.post('/api/signup', async (req: Request, res: Response) => {
 
   const customerData:CustomerData = {
@@ -71,6 +102,8 @@ app.post('/api/signup', async (req: Request, res: Response) => {
   const currentDate = new Date()
   const expiryDate = new Date(currentDate)
   expiryDate.setHours(expiryDate.getHours() + 24)
+
+  await dwollaService.addCustomerFundingSource(id, testFundingSource);
 
   console.log('Setting cookie with sessionId:', sessionId)
   res.cookie('session', sessionId, { 

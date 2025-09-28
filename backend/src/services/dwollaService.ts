@@ -138,8 +138,9 @@ async function initiateTransaction(recieverId:string, senderId:string, amount:st
                 }
             }
         );
+
         console.log("Transfer successfully initiated")
-        return response.headers.get('Location');
+        return response.headers.get('Location').Split('/')[response.headers.get('Location').Split('/').length - 1];
     } catch {
         console.log('Error initiating transaction.')
     }
