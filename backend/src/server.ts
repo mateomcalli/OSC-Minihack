@@ -45,20 +45,18 @@ app.post('/api/transaction', async (req: Request, res: Response) => {
     const match = await User.findOne({ email: collaborators[i]});
 
     let otherId = "";
-
     if (match)
       otherId = match.userId;
     else
       otherId = "null"
     console.log(`Creating transaction with ${otherId} and ${userId}}`)
-
-    let transactionId = await dwollaService.initiateTransaction(userId, otherId, userAmount.toFixed(2));
-    if (!transactionId)
-
+    const transactionId = await dwollaService.initiateTransaction(userId, otherId, userAmount.toFixed(2));
+    if (transactionId)
       await Transaction.create({
         name: transactionName,
         transactionId: transactionId,
-        collaborators: collaborators.join(',')
+        collaborators: collaborators.join(','),
+        amount: amountPaid.toFixed(2)
       });
   }
   return res.status(201);
@@ -67,7 +65,16 @@ app.post('/api/transaction', async (req: Request, res: Response) => {
 app.get('/api/transactions', async (req: Request, res: Response) => {
   const userId = req.cookies.session;
   const transactions = await dwollaService.getCustomerTransfers(userId);
-  res.status(201).json(transactions);
+  let transactionIds= [];
+  if (transactions) {
+    for (let i = 0; i < transactions.length; i++) {
+      let match = await Transaction.findOne({ transactionId: transactions[i].id });
+      if (match)
+        transactionIds.push({name: match.name, collaborators: match.collaborators, amount: match.amount});
+    }
+    return res.status(200).json(transactionIds);
+  }
+  return res.status(404);
 });
 
 app.post('api/create-transaction', async (req: Request, res: Response) => {
