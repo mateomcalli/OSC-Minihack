@@ -1,32 +1,37 @@
 import axios from "axios"
 import { useState } from "react"
 import SignupOne from "./SignupOne"
+import SignupTwo from "./SignupTwo"
 import Footer from "../../components/Footer"
 
-const Signup = () => {
-  interface CustomerData {
-    firstName: string,
-    lastName: string,
-    email: string,
-    type: string,
-    address: string,
-    city: string,
-    state: string,
-    postalCode: string,
-    dateOfBirth: string,
-    ssn: string,
-  }
-  
+interface CustomerData {
+  firstName: string
+  lastName: string
+  email: string
+  dateOfBirth: string
+  phoneNumber: string
+  password: string
+  type: string
+  address1: string
+  city: string
+  state: string
+  postalCode: string
+  ssn: string
+}
+
+const Signup = () => {  
   const [customerData, setCustomerData] = useState<CustomerData>({
     firstName: '',
     lastName: '',
     email: '',
+    dateOfBirth: '',
+    phoneNumber: '',
+    password: '',
     type: 'personal',
-    address: '',
+    address1: '',
     city: '',
     state: '',
     postalCode: '',
-    dateOfBirth: '',
     ssn: '',
   })
   
@@ -37,6 +42,7 @@ const Signup = () => {
       ...prev,
       [event.target.name]: event.target.value
     }))
+    console.log(customerData)
   }
   
   const postFunction = async () => {
@@ -52,9 +58,13 @@ const Signup = () => {
     <>
       {step == 1 &&
         <>
-          <SignupOne/>
-          <Footer/>
+          <SignupOne setStep={setStep} handleChange={handleChange} customerData={customerData}/>
+          <Footer blurb="Already have an account?" linkText="Login" linkPath="/login"/>
         </>
+      }
+
+      {step == 2 &&
+        <SignupTwo postFunction={postFunction} handleChange={handleChange} customerData={customerData}/>
       }
     </>
   )
