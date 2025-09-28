@@ -69,8 +69,8 @@ app.get('/api/auth', async (req: Request, res: Response) => {
     if (!sessionCookie || !match) {
       return res.status(401).json({ error: 'invalid session, login again' })
     }
-    console.log(authorized with id: ${sessionCookie})
-    res.json({ message: authorized with id: ${sessionCookie}})
+    console.log(`authorized with id: ${sessionCookie}`)
+    res.json({ message: "authorized with id: `${sessionCookie}`"})
   } catch (error) {
     console.error(error)
   }
