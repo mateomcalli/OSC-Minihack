@@ -9,6 +9,7 @@ interface Transaction {
   name: string;
   collaborators: string;
   amount: string;
+  direction: 'incoming' | 'outgoing';
 }
 
 const Home = () => {
@@ -62,20 +63,44 @@ const Home = () => {
       </div>
 
       <div className="mb-6">
-        <h1 className="text-4xl mb-5">Active</h1>
+        <h1 className="text-4xl mb-5">You Owe</h1>
         <div className="bg-white shadow rounded-2xl p-4 space-y-4">
-          <Link to='/transactioninfo'>
-            {transactionsList.map((transaction, i) => (
+          {transactionsList.filter(t => t.direction === 'outgoing').map((transaction) => (
+            <Link to='/transactioninfo' key={transaction.transactionId}>
               <HomepageEntry
-                key={transaction.transactionId}
                 paymentName={transaction.name}
                 collaborators={transaction.collaborators}
                 amountPaid={`$${transaction.amount}`}
                 transactionId={transaction.transactionId}
                 onDelete={handleDelete}
+                direction='outgoing'
               />
-            ))}
-          </Link>
+            </Link>
+          ))}
+          {transactionsList.filter(t => t.direction === 'outgoing').length === 0 && (
+            <p className="text-center text-gray-500">No pending payments.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <h1 className="text-4xl mb-5">Owed to You</h1>
+        <div className="bg-white shadow rounded-2xl p-4 space-y-4">
+          {transactionsList.filter(t => t.direction === 'incoming').map((transaction) => (
+            <Link to='/transactioninfo' key={transaction.transactionId}>
+              <HomepageEntry
+                paymentName={transaction.name}
+                collaborators={transaction.collaborators}
+                amountPaid={`$${transaction.amount}`}
+                transactionId={transaction.transactionId}
+                onDelete={handleDelete}
+                direction='incoming'
+              />
+            </Link>
+          ))}
+          {transactionsList.filter(t => t.direction === 'incoming').length === 0 && (
+            <p className="text-center text-gray-500">No incoming payments.</p>
+          )}
         </div>
       </div>
 

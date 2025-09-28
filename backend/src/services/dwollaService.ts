@@ -11,10 +11,10 @@ async function createCustomer(customerData: CustomerData) {
         const response = await appToken.post('customers',
             { ...customerData }, {
             headers: {
-            Accept: 'application/vnd.dwolla.v1.hal+json',
-            'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+                Accept: 'application/vnd.dwolla.v1.hal+json',
+                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
             }
-    });
+        });
         const responseUrl = await response.headers.get('Location');
 
         const customerId = await responseUrl.split('/')[responseUrl.split('/').length - 1];
@@ -34,32 +34,32 @@ async function addCustomerFundingSource(customerId: string, fundingSource: Fundi
 
     try {
         const responst = await appToken.post(`customers/${customerId}/funding-sources`,
-            {...fundingSource}, {
-                headers: {
-                    Accept: 'application/vnd.dwolla.v1.hal+json',
-                    'Content-Type': 'application/vnd.dwolla.v1.hal+json'
-                }
-            });
+            { ...fundingSource }, {
+            headers: {
+                Accept: 'application/vnd.dwolla.v1.hal+json',
+                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+            }
+        });
 
         await verifyFundingSource(customerId);
-        
+
         console.log('Funding source addition success!')
     } catch {
-        console.log("Error: Funding source could not be added.")    
+        console.log("Error: Funding source could not be added.")
         return null;
     }
 }
 
-async function getFundingSource(customerId:string){
+async function getFundingSource(customerId: string) {
     const appToken = await dwolla.auth.client();
-    try{ 
+    try {
         const response = await appToken.get(`customers/${customerId}/funding-sources`,
             {}, {
-                headers: {
-                    Accept: 'application/vnd.dwolla.v1.hal+json',
-                    'Content-Type': 'application/vnd.dwolla.v1.hal+json'
-                }
-            });
+            headers: {
+                Accept: 'application/vnd.dwolla.v1.hal+json',
+                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+            }
+        });
         const fundingSources = response.body._embedded['funding-sources'];
 
         if (fundingSources && fundingSources.length > 0)
@@ -73,19 +73,19 @@ async function getFundingSource(customerId:string){
     }
 }
 
-async function verifyFundingSource(customerId:string){
+async function verifyFundingSource(customerId: string) {
     const appToken = await dwolla.auth.client();
-    
+
     const fundingSource = await getFundingSource(customerId);
     try {
-        const response = await appToken.post(`${fundingSource}/micro-deposits`,{},
+        const response = await appToken.post(`${fundingSource}/micro-deposits`, {},
             {
                 headers: {
                     Accept: 'application/vnd.dwolla.v1.hal+json',
                     'Content-Type': 'application/vnd.dwolla.v1.hal+json'
                 }
             });
-        const response2 = await appToken.post(`${fundingSource}/micro-deposits`,{
+        const response2 = await appToken.post(`${fundingSource}/micro-deposits`, {
             "amount1": {
                 "value": "0.01",
                 "currency": "USD"
@@ -93,63 +93,65 @@ async function verifyFundingSource(customerId:string){
             "amount2": {
                 "value": "0.01",
                 "currency": "USD"
-            }},{
-                headers: {
-                    Accept: 'application/vnd.dwolla.v1.hal+json',
-                    'Content-Type': 'application/vnd.dwolla.v1.hal+json'
-                }
-            });
+            }
+        }, {
+            headers: {
+                Accept: 'application/vnd.dwolla.v1.hal+json',
+                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+            }
+        });
         console.log("Success");
     } catch {
         console.log('Error verifying funding source.');
     }
 }
 
-async function initiateTransaction(recieverId:string, senderId:string, amount:string){
+async function initiateTransaction(recieverId: string, senderId: string, amount: string) {
     const appToken = await dwolla.auth.client();
 
     const recieverFundingSource = await getFundingSource(recieverId);
     const senderFundingSource = await getFundingSource(senderId);
 
-    if (!recieverFundingSource){
+    if (!recieverFundingSource) {
         console.log("Error Reciever has no funding source.")
         return;
-    } else if (!senderFundingSource){
+    } else if (!senderFundingSource) {
         console.log("Error: Sender has no funding source.")
         return;
     }
-        const response = await appToken.post('transfers', {
-            _links: {
-                source: {
-                    href: senderFundingSource
-                },
-                destination: {
-                    href: recieverFundingSource
-                }
-            }, amount: {
-                currency: 'USD',
-                value: amount
-            }}, {
-                headers: {
-                    Accept: 'application/vnd.dwolla.v1.hal+json',
-                    'Content-Type': 'application/vnd.dwolla.v1.hal+json'
-                }
+    const response = await appToken.post('transfers', {
+        _links: {
+            source: {
+                href: senderFundingSource
+            },
+            destination: {
+                href: recieverFundingSource
             }
-        );
+        }, amount: {
+            currency: 'USD',
+            value: amount
+        }
+    }, {
+        headers: {
+            Accept: 'application/vnd.dwolla.v1.hal+json',
+            'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+        }
+    }
+    );
 
-        console.log("Transfer successfully initiated: " + response.headers.get('Location').split('/')[response.headers.get('Location').split('/').length - 1]);
-        return response.headers.get('Location').split('/')[response.headers.get('Location').split('/').length - 1];
+    console.log("Transfer successfully initiated: " + response.headers.get('Location').split('/')[response.headers.get('Location').split('/').length - 1]);
+    return response.headers.get('Location').split('/')[response.headers.get('Location').split('/').length - 1];
 }
 
-async function checkTransactionStatus(transactionId:string){
+async function checkTransactionStatus(transactionId: string) {
     const appToken = await dwolla.auth.client();
 
-    try{
-        const response = await appToken.get(`${transactionId}`,{},{
+    try {
+        const response = await appToken.get(`${transactionId}`, {}, {
             headers: {
                 Accept: 'application/vnd.dwolla.v1.hal+json',
                 'Content-Type': 'application/vnd.dwolla.v1.hal+json'
-                }
+            }
         });
         const status = response.body.status;
         return status;
@@ -158,19 +160,20 @@ async function checkTransactionStatus(transactionId:string){
     }
 }
 
-async function getCustomerTransfers(customerId:string) {
+async function getCustomerTransfers(customerId: string) {
     const appToken = await dwolla.auth.client();
+    const userFundingSource = await getFundingSource(customerId);
 
     try {
-        const response = await appToken.get(`customers/${customerId}/transfers`,{},{
+        const response = await appToken.get(`customers/${customerId}/transfers`, {}, {
             headers: {
                 Accept: 'application/vnd.dwolla.v1.hal+json',
                 'Content-Type': 'application/vnd.dwolla.v1.hal+json'
-                }
+            }
         });
         const transfers = response.body._embedded['transfers'];
-        let transferObjs:Transfer[] = [];
-        for(let i = 0; i < transfers.length; i++) {
+        let transferObjs: Transfer[] = [];
+        for (let i = 0; i < transfers.length; i++) {
             if (transfers[i].status === 'cancelled')
                 continue;
             console.log('Transaction ID: ' + transfers[i].id + ' Status: ' + transfers[i].status)
@@ -178,10 +181,11 @@ async function getCustomerTransfers(customerId:string) {
                 id: transfers[i].id,
                 status: transfers[i].status,
                 amount: transfers[i].amount.value,
-                created: transfers[i].created
+                created: transfers[i].created,
+                direction: transfers[i]._links.source.href === userFundingSource ? 'outgoing' : 'incoming'
             });
         }
-        
+
         return transferObjs;
 
     } catch {
@@ -189,16 +193,18 @@ async function getCustomerTransfers(customerId:string) {
     }
 }
 
-async function closeTransaction(transactionId:string) {
+async function closeTransaction(transactionId: string) {
     const appToken = await dwolla.auth.client();
     try {
-        const response = await appToken.post(`transfers/${transactionId}`,{
+        const response = await appToken.post(`transfers/${transactionId}`, {
             status: 'cancelled'
         },
-            {headers: {
-                Accept: 'application/vnd.dwolla.v1',
-                'Content-Type': 'application/vnd.dwolla.v1.hal+json'
-            }});
+            {
+                headers: {
+                    Accept: 'application/vnd.dwolla.v1',
+                    'Content-Type': 'application/vnd.dwolla.v1.hal+json'
+                }
+            });
         console.log(`${transactionId} successfully closed.`)
     } catch {
         console.log('Error closing transaction.')
