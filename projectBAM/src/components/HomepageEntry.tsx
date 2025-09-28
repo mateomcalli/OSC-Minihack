@@ -20,4 +20,5 @@ const HomepageEntry = ({paymentName, collaborators, amountPaid}: HomepageEntryPr
   )
 }
 
-export default HomepageEntry
+export {HomepageEntry}
+export type {HomepageEntryProps}

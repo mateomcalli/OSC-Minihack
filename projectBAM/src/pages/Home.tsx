@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { LuUser } from "react-icons/lu";
-import HomepageEntry from "../components/HomepageEntry";
+import { HomepageEntry } from "../components/HomepageEntry";
 
 
 const Home = () => {
@@ -8,7 +8,7 @@ const Home = () => {
     <div className='relative z-1 flex flex-col pt-4 px-4'>
       <div className="flex justify-between">
         <img src="logo.png" className="w-[48px] h-[53px] mb-12 drop-shadow-md/50" />
-        <div className="w-fit h-fit pt-2"><LuUser className="w-10 h-10"/></div>
+        <Link to='/account'><div className="w-fit h-fit pt-2"><LuUser className="w-10 h-10"/></div></Link>
       </div>
       <div className="mb-6">
         <h1 className="text-4xl mb-5">Active</h1>

@@ -17,12 +17,13 @@ name: {
     required: true,
     unique: true
   },
-  password: {
+  collaborators: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   }
 })
 
-const Transaction = model<ITransaction>('user', TransactionSchema)
+const Transaction = model<ITransaction>('transanction', TransactionSchema)
 
 export default Transaction

@@ -33,13 +33,14 @@ mongoose.connect(getMongoUri())
   .then(() => console.log('Connected to MongoDB!'))
   .catch(error => console.log('Error connecting to MongoDB:', error.message))
 
-app.post('api/transaction', async (req: Request, res: Response) => {
-  const userId = req.cookies.sessionId;
+app.post('/api/transaction', async (req: Request, res: Response) => {
+  const userId = req.cookies.session;
   const collaborators = req.body.collaborators;
   const amountPaid = req.body.amountPaid;
   const transactionName = req.body.paymentName;
 
   for(let i = 0; i < collaborators.length; i++) {
+
     let userAmount = amountPaid / collaborators.length;
     const match = await User.findOne({ email: collaborators[i]});
 
@@ -49,6 +50,7 @@ app.post('api/transaction', async (req: Request, res: Response) => {
       otherId = match.userId;
     else
       otherId = "null"
+    console.log(`Creating transaction with ${otherId} and ${userId}}`)
 
     let transactionId = await dwollaService.initiateTransaction(userId, otherId, userAmount.toFixed(2));
     if (!transactionId)
@@ -59,10 +61,11 @@ app.post('api/transaction', async (req: Request, res: Response) => {
         collaborators: collaborators.join(',')
       });
   }
+  return res.status(201);
 });
 
 app.get('/api/transactions', async (req: Request, res: Response) => {
-  const userId = req.cookies.sessionId;
+  const userId = req.cookies.session;
   const transactions = await dwollaService.getCustomerTransfers(userId);
   res.status(201).json(transactions);
 });
