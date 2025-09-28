@@ -62,6 +62,20 @@ app.post('/api/transaction', async (req: Request, res: Response) => {
   return res.status(201);
 });
 
+app.get('/api/auth', async (req: Request, res: Response) => {
+  try {
+    const sessionCookie = req.cookies.session
+    const match = await Session.findOne({ sessionId : sessionCookie })
+    if (!sessionCookie || !match) {
+      return res.status(401).json({ error: 'invalid session, login again' })
+    }
+    console.log(authorized with id: ${sessionCookie})
+    res.json({ message: authorized with id: ${sessionCookie}})
+  } catch (error) {
+    console.error(error)
+  }
+})
+
 app.get('/api/transactions', async (req: Request, res: Response) => {
   const userId = req.cookies.session;
   const transactions = await dwollaService.getCustomerTransfers(userId);

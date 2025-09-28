@@ -1,50 +1,20 @@
 import { Link } from "react-router-dom";
-import { useState, useRef } from "react";
+import { useEffect } from "react";
 import axios from "axios";
 
-interface NewBankAccountProps {
-  routingNumber: string
-  accountNumber: string
-  bankAccountType: string
-  name: string
-}
-
 const Account = () => {
-  const [bankAccount, setBankAccount] = useState<NewBankAccountProps>({
-    routingNumber: "",
-    accountNumber: "",
-    bankAccountType: "",
-    name: ""
-  })
-
-  const formRef = useRef<HTMLFormElement | null>(null)
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target
-    setBankAccount((prev)=>({
-      ...prev,
-      [name] : value
-    }));
-  }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    try {
-      console.log("Submitting:", bankAccount)
-      await axios.post("http://localhost:3000/api/transaction", bankAccount, {withCredentials: true})
-
-      setBankAccount({
-        routingNumber: "",
-        accountNumber: "",
-        bankAccountType: "",
-        name: ""
-      })
-      formRef.current?.reset()
-    } catch (error) {
-      console.error("Error submitting transaction:", error)
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(`http://localhost:3000/api/auth`, { withCredentials: true })
+      } catch (error) { 
+        console.error(error)
+        window.location.href = '/login'
+      }
     }
-  }
-
+    checkAuth()
+  }, [])
+  
   return (
     <div>
       <div className='relative z-1 flex flex-col pt-10 px-4'>
