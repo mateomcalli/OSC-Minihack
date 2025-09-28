@@ -4,6 +4,7 @@ export interface ITransaction extends Document {
   transactionId: string;
   collaborators: string;
   name: string;
+  amount: string;
 }
 
 const TransactionSchema = new Schema({
@@ -18,6 +19,11 @@ name: {
     unique: true
   },
   collaborators: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  amount: {
     type: String,
     required: true,
     unique: true

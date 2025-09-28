@@ -118,8 +118,6 @@ async function initiateTransaction(recieverId:string, senderId:string, amount:st
         console.log("Error: Sender has no funding source.")
         return;
     }
-
-    try{
         const response = await appToken.post('transfers', {
             _links: {
                 source: {
@@ -139,11 +137,8 @@ async function initiateTransaction(recieverId:string, senderId:string, amount:st
             }
         );
 
-        console.log("Transfer successfully initiated")
-        return response.headers.get('Location').Split('/')[response.headers.get('Location').Split('/').length - 1];
-    } catch {
-        console.log('Error initiating transaction.')
-    }
+        console.log("Transfer successfully initiated: " + response.headers.get('Location').split('/')[response.headers.get('Location').split('/').length - 1]);
+        return response.headers.get('Location').split('/')[response.headers.get('Location').split('/').length - 1];
 }
 
 async function checkTransactionStatus(transactionId:string){
