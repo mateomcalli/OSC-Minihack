@@ -1,8 +1,8 @@
-type HomepageEntryProps = {
-  paymentName: string;
-  collaborators: string;
-  amountPaid: string;
-};
+interface HomepageEntryProps {
+  paymentName: string
+  collaborators: string
+  amountPaid: string
+}
 
 const HomepageEntry = ({paymentName, collaborators, amountPaid}: HomepageEntryProps) => {
   return (
