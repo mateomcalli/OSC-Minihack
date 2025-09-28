@@ -1,4 +1,4 @@
-import type {CustomerData} from './types/types.ts';
+import type {CustomerData, FundingSource} from './types/types.ts';
 
 const testCustomer: CustomerData = {
     firstName: "John",
@@ -12,6 +12,12 @@ const testCustomer: CustomerData = {
     dateOfBirth: "1990-01-01",
     ssn: "6789"
 }
+const testFundingSource: FundingSource = {
+    routingNumber: "222222226",
+    accountNumber: "987654321",
+    bankAccountType: "checking",
+    name: "John Doe's Guap Account"
+}
 
-export {testCustomer}
+export {testCustomer, testFundingSource}
 

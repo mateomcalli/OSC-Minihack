@@ -11,4 +11,11 @@ interface CustomerData {
     ssn: string;
 }
 
-export { CustomerData };
+interface FundingSource {
+    routingNumber: string;
+    accountNumber: string;
+    bankAccountType: string;
+    name: string;
+}
+
+export { CustomerData, FundingSource };
